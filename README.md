@@ -1,4 +1,4 @@
-# train-gui
+# trainline
 
 ## setup
 
@@ -12,5 +12,12 @@ pip install -r requirements.txt
 
 ```
 python src/main.py
+```
+
+## Examples
+
+Folium map
+```
+python src/examples/folium.py
 ```
 
