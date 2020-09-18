@@ -2,11 +2,59 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-18 23:39:36
+# @Last Modified time: 2020-09-19 00:08:36
 
 
 import logging
 import time
+import sys
+
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QGroupBox, QDialog, QVBoxLayout, QGridLayout
+from PyQt5.QtGui import QIcon
+from PyQt5 import QtGui
+from PyQt5.QtCore import pyqtSlot
+
+# custom widgets
+from viewvideo import VideoWidget
+from viewsignal import SignalWidget
+from viewmap import MapWidget
+
+class Window(QDialog):
+
+  def __init__(self):
+    super(Window, self).__init__()
+
+    # Button to load data
+    self.LoadButton = QPushButton('Load Data')
+    # Button connected to `plot` method
+    self.PlotButton = QPushButton('Plot')
+
+    # set the layout
+    self.horizontalGroupBox = QGroupBox("Grid")
+    layout = QGridLayout()
+
+    # layout.setColumnStretch(1, 4)
+    # layout.setColumnStretch(2, 4)
+    
+    # Video widget
+    self.wvideo = VideoWidget(self)
+    layout.addWidget(self.wvideo,0,0,2,1)
+
+    # Signal widget
+    self.wsignal = SignalWidget(self)
+    layout.addWidget(self.wsignal,0,1,1,1)
+
+    # Signal widget
+    self.wmap = MapWidget(self)
+    layout.addWidget(self.wmap,1,1,1,1)
+
+
+    self.setLayout(layout)
+
+    self.setGeometry(100,100,500,300)
+    self.setWindowTitle("UI Testing")
+
+
 
 class View(object):
   """docstring for Model"""
@@ -18,6 +66,32 @@ class View(object):
   def viewThread(self):
     logging.info("Thread %s: starting", self.name)
     
+    app = QApplication(sys.argv)
+
+    main = Window()
+    main.show()
+
+    sys.exit(app.exec_())
+
+    # app = QApplication([])
+
+    # window = MainWindows.main_window()
+    # window.show()
+    # app.exec_()
+
+    # # self.setWindowTitle("Trainline")
+    # # self.setGeometry(self.left, self.top, self.width, self.height)
+    
+    # self.createGridLayout()
+    
+    # windowLayout = QVBoxLayout()
+    # windowLayout.addWidget(self.horizontalGroupBox)
+    # window.setLayout(windowLayout)
+    
+    # self.show()
+
+    # app.exec_()
+
     while not self.exit:
       # VIEW CODE COMES HERE!!!!!
       pass
