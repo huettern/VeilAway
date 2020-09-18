@@ -43,11 +43,3 @@ if __name__ == "__main__":
 
 
 # from PyQt5.QtWidgets import QApplication, QLabel
-
-# app = QApplication([])
-
-# label = QLabel('Hello World!')
-
-# label.show()
-
-# app.exec_()

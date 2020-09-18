@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 00:08:36
+# @Last Modified time: 2020-09-19 01:01:17
 
 
 import logging
@@ -33,8 +33,10 @@ class Window(QDialog):
     self.horizontalGroupBox = QGroupBox("Grid")
     layout = QGridLayout()
 
-    # layout.setColumnStretch(1, 4)
-    # layout.setColumnStretch(2, 4)
+    layout.setColumnStretch(0, 6)
+    layout.setColumnStretch(1, 4)
+    layout.setRowStretch(0, 5)
+    layout.setRowStretch(1, 5)
     
     # Video widget
     self.wvideo = VideoWidget(self)
@@ -48,12 +50,13 @@ class Window(QDialog):
     self.wmap = MapWidget(self)
     layout.addWidget(self.wmap,1,1,1,1)
 
-
     self.setLayout(layout)
 
-    self.setGeometry(100,100,500,300)
+    self.setGeometry(100,100,1000,600)
     self.setWindowTitle("UI Testing")
 
+  def update(self, model):
+    self.wsignal.update(model)
 
 
 class View(object):
@@ -68,8 +71,8 @@ class View(object):
     
     app = QApplication(sys.argv)
 
-    main = Window()
-    main.show()
+    self.main = Window()
+    self.main.show()
 
     sys.exit(app.exec_())
 
@@ -105,6 +108,8 @@ class View(object):
   def setModel(self, model):
     self.model = model
 
+  def update(self):
+    self.main.update(self.model)
 
 if __name__ == "__main__":
   print("view main()")

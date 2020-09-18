@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-18 23:39:10
+# @Last Modified time: 2020-09-19 00:59:07
 
 
 import logging
@@ -20,6 +20,8 @@ class Model(object):
     
     while not self.exit:
       # MODEL CODE COMES HERE!!!!!
+      time.sleep(1)
+      self.view.update()
       pass
 
     logging.info("Thread %s: finishing", self.name)
@@ -29,6 +31,9 @@ class Model(object):
 
   def setView(self, view):
     self.view = view
+
+  def getSignalName(self):
+    return "Signal Name"
 
 
 

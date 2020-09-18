@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 00:04:57
+# @Last Modified time: 2020-09-19 00:57:18
 
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
@@ -14,6 +14,9 @@ class SignalWidget(QWidget):
   def __init__(self, mainview):
     QWidget.__init__(self)
     self.mainLayout = QVBoxLayout(self)
-    self.mainLayout.addWidget(QLabel("Signal"))
+    self.testlabel = QLabel("Signal")
+    self.mainLayout.addWidget(self.testlabel)
     self.setLayout(self.mainLayout)
 
+  def update(self, model):
+    self.testlabel.setText(model.getSignalName())
