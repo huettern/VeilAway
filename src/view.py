@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 01:01:17
+# @Last Modified time: 2020-09-19 01:19:49
 
 
 import logging
@@ -52,11 +52,13 @@ class Window(QDialog):
 
     self.setLayout(layout)
 
-    self.setGeometry(100,100,1000,600)
+    self.setGeometry(100,100,1300,600)
     self.setWindowTitle("UI Testing")
 
   def update(self, model):
     self.wsignal.update(model)
+    self.wvideo.update(model)
+    self.wmap.update(model)
 
 
 class View(object):

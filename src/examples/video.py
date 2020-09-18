@@ -123,6 +123,7 @@ class Window(QWidget):
             )
 
     def position_changed(self, position):
+        print("position_changed")
         self.slider.setValue(position)
 
 

@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 00:59:07
+# @Last Modified time: 2020-09-19 01:17:29
 
 
 import logging
@@ -35,7 +35,11 @@ class Model(object):
   def getSignalName(self):
     return "Signal Name"
 
+  def getImageName(self):
+    return "/home/noah/Trackpictures/nice_weather/nice_weather_thusis_filisur_20200827_pixelated/image_01100.jpg"
 
+  def getMapLocation(self):
+    return [47.3775499,8.4666755]
 
 
 if __name__ == "__main__":
