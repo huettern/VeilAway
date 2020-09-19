@@ -6,6 +6,10 @@
     position: relative;
 }
 
+.col-md-4 {
+    padding: 0;
+}
+
 .blockpart {
     padding: 1.5rem 1.25rem;
     margin-bottom: 1rem;
@@ -35,11 +39,11 @@ p {
 .imagenextsignal {
     width: inherit;
     position: relative;
-    margin-left: 70%;
+    margin-left: 50%;
 }
 
 .imagenextsignal img {
-    width: 6rem;
+    /*width: 6rem;*/
 }
 
 .map img {
