@@ -147,7 +147,14 @@ if __name__ == "__main__":
     pic = dict(zip(closest_gps_points_unique, dfimg['ImgName'][idx_closest_gps_points_unique]))
     dfobjgj['Closest Image'] = np.zeros_like(dfobjgj['Relative Position'].to_numpy())
     dfobjgj['Closest Image'][pic.keys()] = pic
-    imagenums = dfobjgj['Closest Image'].str.extract('(\d+)')
+    imagenums = dfobjgj['Closest Image'].str.extract('(\d+)').to_numpy().astype(np.float).reshape([-1])
+    f_pic = interpolate.interp1d((dfobjgj['Relative Position'].to_numpy())[np.isfinite(imagenums)], imagenums[np.isfinite(imagenums)], fill_value='extrapolate')
+    imagenums2 = f_pic(dfobjgj['Relative Position'].to_numpy())
+    imagenums2[imagenums2>5000] = min(imagenums2)
+    imagenums2 = imagenums2.astype(int)
+
+    for i in range(0, len(imagenums2)):
+        dfobjgj.at[i, 'Closest Image'] = 'image_' + str(imagenums2[i]) + '.jpg'
 
 
     folium.GeoJson(
