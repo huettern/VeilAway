@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-from scipy import interpolate
+from scipy import spatial
 import io
 import sys
 import folium
@@ -10,6 +10,8 @@ from PyQt5 import QtWidgets, QtWebEngineWidgets
 import gpxpy
 import geojson
 import geopy.distance as gpd
+from scipy.interpolate import interpolate
+
 
 def overlayGPX(gpxData, map):
     '''
@@ -82,10 +84,27 @@ df = pd.concat([df,df2])
 df = df.sort_values(by=['Relative Position'])
 df = df[df['Relative Position']>40]
 df = df[df['Relative Position']<65.5]
+
+rp = df['Relative Position'].to_numpy()
+lat = df['Latitude'].to_numpy()
+lon = df['Longitude'].to_numpy()
+
+f_lat = interpolate.interp1d(rp[np.isfinite(lat)], lat[np.isfinite(lat)], fill_value='extrapolate')
+f_lon = interpolate.interp1d(rp[np.isfinite(lon)], lon[np.isfinite(lon)], fill_value='extrapolate')
+latint = f_lat(rp)
+lonint = f_lon(rp)
+
+df['Longitude'] = lonint
+df['Latitude'] = latint
+
+points = df[['Latitude', 'Longitude']].to_numpy()
+availpt = np.reshape(points[np.isfinite(points)],[-1,2])
+tree = spatial.KDTree(availpt)
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     m = folium.Map(
-        location=[np.mean(lat[np.isfinite(lat)]), np.mean(lon[np.isfinite(lat)])], zoom_start=13
+        location=[np.mean(latint), np.mean(lonint)], zoom_start=13
     )
 
     data = io.BytesIO()
@@ -108,12 +127,3 @@ if __name__ == "__main__":
     ).add_to(m)
 
     m.save(outfile='map_1.html', close_file=False)
-
-    # w = QtWebEngineWidgets.QWebEngineView()
-    # w.setHtml(data.getvalue().decode())
-    # w.resize(640, 480)
-    # w.show()
-
-
-
-    #sys.exit(app.exec_())
