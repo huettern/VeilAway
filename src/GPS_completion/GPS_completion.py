@@ -1,4 +1,5 @@
 import os
+import piexif
 import pandas as pd
 import numpy as np
 from scipy import spatial
@@ -12,6 +13,8 @@ import geojson
 import geopy.distance as gpd
 from scipy.interpolate import interpolate
 
+path_to_images_filisur_thusis = r"D:\Dataset_complete\Trackpictures\nice_weather\nice_weather_filisur_thusis_20200824_pixelated"
+path_to_images_thusis_filisur = r"D:\Dataset_complete\Trackpictures\nice_weather\nice_weather_thusis_filisur_20200827_pixelated"
 
 def overlayGPX(gpxData, map):
     '''
@@ -28,29 +31,85 @@ def overlayGPX(gpxData, map):
             for point in segment.points:
                 points.append(tuple([point.latitude, point.longitude]))
                 folium.Marker([point.latitude,point.longitude], color="red", weight=2.5, opacity=1).add_to(map)
-    return (map)
+    return map
 
+def read_geojson(path):
+    with open(os.path.realpath(path)) as f:
+        gj = geojson.load(f)
+        return gj
 
-df = pd.read_excel(os.path.realpath('TrackSiteData_2020_clean.xlsx'), index_col=None)
-rp = df['Relative Position'].to_numpy()
-lat = df['Latitude'].to_numpy()
-lon = df['Longitude'].to_numpy()
+def geojson_to_df(gj):
 
-with open(os.path.realpath('export.geojson')) as f:
-    gj = geojson.load(f)
+    # Keep only polyline
+    gj['features'] = [gj['features'][2]]
+    df=pd.DataFrame()
+    for feat in gj['features']:
+        for coord in feat['geometry']['coordinates']:
+            df_new = pd.DataFrame([[coord[0], coord[1], 'geojson']], columns=['Longitude', 'Latitude', 'Element Type'])
+            df = pd.concat([df, df_new])
 
-# Keep only polyline
-gj['features'] = [gj['features'][2]]
-df2=pd.DataFrame()
-for feat in gj['features']:
-        if (feat['geometry']['type'] == 'Point'):
-            None
-            #df_new = pd.DataFrame([[feat['geometry']['coordinates'][0], feat['geometry']['coordinates'][1], 'geojson']],columns=['Latitude', 'Longitude', 'Element Type'])
-            #df2 = pd.concat([df2,df_new])
+    posold = (df['Latitude'].iloc[0], df['Longitude'].iloc[0])
+    dis = np.zeros(df.values.shape[0])
+    for coord in range(1, df.values.shape[0]):
+        pos = (df['Latitude'].iloc[coord], df['Longitude'].iloc[coord])
+        dis[coord] = gpd.distance(posold, pos).km + dis[coord - 1]
+        posold = pos
+    df['Relative Position'] = dis + 39.54579102261809  # correct offset
+    return df
+
+def concat_interp(dfs_to_concat):
+    df = pd.concat(dfs_to_concat)
+    df = df.sort_values(by=['Relative Position'])
+    df = df[df['Relative Position'] > 40] #Filter what's out of range
+    df = df[df['Relative Position'] < 65.5]
+
+    rp = df['Relative Position'].to_numpy()
+    lat = df['Latitude'].to_numpy()
+    lon = df['Longitude'].to_numpy()
+
+    f_lat = interpolate.interp1d(rp[np.isfinite(lat)], lat[np.isfinite(lat)], fill_value='extrapolate')
+    f_lon = interpolate.interp1d(rp[np.isfinite(lon)], lon[np.isfinite(lon)], fill_value='extrapolate')
+    latint = f_lat(rp)
+    lonint = f_lon(rp)
+    df['Longitude'] = lonint
+    df['Latitude'] = latint
+    return df
+
+def init_gps_dist_tree(df):
+    points = df[['Latitude', 'Longitude']].to_numpy()
+    availpt = np.reshape(points[np.isfinite(points)], [-1, 2])
+    return spatial.KDTree(availpt)
+
+def gps_to_dist(pts,tree):
+    return tree.query(pts)
+
+def read_track_from_exif_images(path_to_images):
+    images = os.listdir(path_to_images)
+    images = [img for img in images if img[-4:] == ".jpg"]
+    gps_measurements = pd.DataFrame()
+
+    for img in images:
+        exif_dict = piexif.load(os.path.join(path_to_images, img))
+        row_dict = exif_dict['GPS']
+        row_dict["ImgName"] = img
+        gps_measurements = gps_measurements.append(row_dict, ignore_index=True)
+
+    column_names = []
+    for tag in gps_measurements.columns:
+        if tag != "ImgName":
+            column_names.append(piexif.TAGS['GPS'][tag]["name"])
         else:
-            for coord in feat['geometry']['coordinates']:
-                df_new = pd.DataFrame([[coord[0], coord[1], 'geojson']], columns=['Longitude', 'Latitude', 'Element Type'])
-                df2 = pd.concat([df2, df_new])
+            column_names.append("ImgName")
+
+    gps_measurements.columns = column_names
+    gps_measurements['GPSLatitude'] = gps_measurements['GPSLatitude'].map(lambda x: x[0] / x[1])
+    gps_measurements['GPSLongitude'] = gps_measurements['GPSLongitude'].map(lambda x: x[0] / x[1])
+    gps_measurements['GPSAltitude'] = gps_measurements['GPSAltitude'].map(lambda x: 1 if pd.isna(x) else x[0] / x[1])
+    gps_measurements['GPSDOP'] = gps_measurements['GPSDOP'].map(lambda x: x[0] / x[1])
+    gps_measurements['GPSSpeed'] = gps_measurements['GPSSpeed'].map(lambda x: x[0] / x[1])
+    return gps_measurements
+
+
 
 #Find out what the closest points are
 # minval = np.inf
@@ -67,60 +126,26 @@ for feat in gj['features']:
 #         print(testdis[mindistidx]) #0.0010567557775868317
 #         minval = testdis[mindistidx]
 
-
-
-posold = (df2['Latitude'].iloc[0],df2['Longitude'].iloc[0])
-dis = np.zeros(df2.values.shape[0])
-for coord in range(1,df2.values.shape[0]):
-    pos = (df2['Latitude'].iloc[coord], df2['Longitude'].iloc[coord])
-    dis[coord] = gpd.distance(posold, pos).km + dis[coord-1]
-    posold=pos
-
-dis = dis - np.ones_like(dis)*(dis[649]-df['Relative Position'].values[237]) #correct offset
-
-df2['Relative Position'] = dis
-
-df = pd.concat([df,df2])
-df = df.sort_values(by=['Relative Position'])
-df = df[df['Relative Position']>40]
-df = df[df['Relative Position']<65.5]
-
-rp = df['Relative Position'].to_numpy()
-lat = df['Latitude'].to_numpy()
-lon = df['Longitude'].to_numpy()
-
-f_lat = interpolate.interp1d(rp[np.isfinite(lat)], lat[np.isfinite(lat)], fill_value='extrapolate')
-f_lon = interpolate.interp1d(rp[np.isfinite(lon)], lon[np.isfinite(lon)], fill_value='extrapolate')
-latint = f_lat(rp)
-lonint = f_lon(rp)
-
-df['Longitude'] = lonint
-df['Latitude'] = latint
-
-points = df[['Latitude', 'Longitude']].to_numpy()
-availpt = np.reshape(points[np.isfinite(points)],[-1,2])
-tree = spatial.KDTree(availpt)
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     m = folium.Map(
-        location=[np.mean(latint), np.mean(lonint)], zoom_start=13
+        location=[46.689477, 9.499883], zoom_start=13
     )
 
     data = io.BytesIO()
 
-    lat = df['Latitude'].to_numpy()
-    lon = df['Longitude'].to_numpy()
-    relpos = df['Relative Position'].to_numpy()
-    latc = lat[np.isfinite(lat)]
-    lonc = lon[np.isfinite(lon)]
-    relpos = relpos[np.isfinite(lon)]
-    for i in range(0,len(lonc)):
-        folium.Marker(location=[latc[i], lonc[i]], popup=relpos[i]).add_to(m)
+    dfobj = pd.read_excel(os.path.realpath('TrackSiteData_2020_clean.xlsx'), index_col=None)
+    gj = read_geojson('export.geojson')
+    dfgj = geojson_to_df(gj)
+    dfobjgj = concat_interp([dfobj, dfgj]).reset_index()
+    tree_dist = init_gps_dist_tree(dfobjgj)
+    dfimg = pd.DataFrame(read_track_from_exif_images(path_to_images_thusis_filisur))
+    closest_gps_points = gps_to_dist(dfimg[['GPSLatitude', 'GPSLongitude']].to_numpy().reshape([-1,2]), tree_dist)
+    print(np.max(closest_gps_points[0]))#max approx error
+    closest_gps_points, idx_closest_gps_points, inv_closest_gps_points = np.unique(closest_gps_points[1], return_index=True, return_inverse=True)
 
-    # for i in range(0, len(latint)):
-    #     folium.Marker(location=[latint[i], lonint[i]]).add_to(m)
-    #
+    pic = pd.Series(dfimg['ImgName'][idx_closest_gps_points], index=closest_gps_points)
+    dfobjgj['Closest Image'] = pic
     folium.GeoJson(
         gj,
         name='geojson'
