@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 13:39:22
+# @Last Modified time: 2020-09-19 15:08:19
 
 
 import logging
@@ -46,6 +46,7 @@ class Signal(object):
     # Items to display
     self.timeTo = 30 # s
     self.distanceTo = 1000 # m
+
 
   def fromJson(self, j):
     if 'ID' in j.keys():
@@ -98,6 +99,10 @@ class Model(object):
     self.pos = 23000
     self.lat = 42
     self.lon = 8
+
+    # last signal
+    self.lastSignLocation = 23300
+    self.lastDistanceToNext = 1000
 
     # next signal
     self.nextSignal = Signal()
