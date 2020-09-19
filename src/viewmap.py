@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 01:51:31
+# @Last Modified time: 2020-09-19 09:10:47
 
 import io
 import folium
@@ -61,19 +61,19 @@ class MapWidget(QWidget):
     # print(type(self.w))
     # self.mainLayout.addWidget(QLabel("asdf"))
     # self.w = QtWebEngineWidgets.QWebEngineView()
-    # self.w.setHtml(data.getvalue().decode())
+    self.w.setHtml(data.getvalue().decode())
 
 
-    m = folium.Map(
-        location=[46.6807711,9.6756752], tiles="Stamen Toner", zoom_start=13
-    )
-    data = io.BytesIO()
-    m.save(data, close_file=False)
-    neww = QtWebEngineWidgets.QWebEngineView()
-    x = data.getvalue().decode()
+    # m = folium.Map(
+    #     location=[46.6807711,9.6756752], tiles="Stamen Toner", zoom_start=13
+    # )
+    # data = io.BytesIO()
+    # m.save(data, close_file=False)
+    # neww = QtWebEngineWidgets.QWebEngineView()
+    # x = data.getvalue().decode()
     # neww.setHtml(x)
     # neww.setHtml(data.getvalue().decode())
-    self.mainLayout.addWidget(neww)
+    # self.mainLayout.addWidget(neww)
 
     # self.mainLayout.addWidget(self.w)
     # self.mainLayout.removeWidget(self.w)

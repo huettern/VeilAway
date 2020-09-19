@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 01:19:49
+# @Last Modified time: 2020-09-19 09:10:25
 
 
 import logging
@@ -12,7 +12,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QGroupBox, QDialog, QVBoxLayout, QGridLayout
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtGui
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QTimer, QObject
 
 # custom widgets
 from viewvideo import VideoWidget
@@ -61,9 +61,10 @@ class Window(QDialog):
     self.wmap.update(model)
 
 
-class View(object):
+class View(QObject):
   """docstring for Model"""
   def __init__(self, name):
+    super(View, self).__init__()
     self.name = name
     self.exit = False
     self.model = None
@@ -76,7 +77,13 @@ class View(object):
     self.main = Window()
     self.main.show()
 
+    self.timer = QTimer(self)
+    self.timer.setInterval(100)
+    self.timer.timeout.connect(self.timerEvent)
+    self.timer.start()
+    print("after timer start")
     sys.exit(app.exec_())
+    print("after app exec")
 
     # app = QApplication([])
 
@@ -97,12 +104,20 @@ class View(object):
 
     # app.exec_()
 
-    while not self.exit:
-      # VIEW CODE COMES HERE!!!!!
-      pass
+    # while not self.exit:
+    #   # VIEW CODE COMES HERE!!!!!
+    #   time.sleep(1)
+    #   print("View heartbeat")
+    #   pass
 
     logging.info("Thread %s: finishing", self.name)
 
+
+  def timerEvent(self):
+    # print("timer event")
+    if self.model.getChanged():
+      # print("view: model has changed")
+      self.main.update(self.model)
 
   def terminate(self):
     self.exit = True
