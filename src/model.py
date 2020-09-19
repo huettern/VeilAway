@@ -2,12 +2,13 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 16:07:21
+# @Last Modified time: 2020-09-19 18:32:04
 
 
 import logging
 import time
-import os.path
+import json
+import os
 
 TRACK_PIC_DIR = "/home/noah/Trackpictures"
 DW_TO_DIR = {
@@ -23,6 +24,8 @@ IMG_NOT_FOUND = "assets/imnotfound.png"
 SIGNAL_IMG_DIR = "assets/signals/png/120"
 
 SIGNAL_TYPES = ["40", "60", "90", "stop", "vmax"]
+
+MODEL_LOOP_TIME = 0.2 # s
 
 
 def relativeToCoordinates(rel):
@@ -93,12 +96,13 @@ class Model(object):
     self.currentImage = ""
     self.overlayEnabled = False
     self.gpsEmulationMode = "static" # static or velocity
-    self.gpsEmulationVelocity = 10 # m/s
+    self.gpsEmulationVelocity = 10 # km/h
 
     # current vehicle position
-    self.pos = 23000
-    self.lat = 42
-    self.lon = 8
+    self.pos = 41.111 # km
+    self.lat = 46.6981226
+    self.lon = 9.4412016
+    self.currentImage = 'image_00101.jpg'
 
     # last signal
     self.lastSignLocation = 23300
@@ -107,16 +111,26 @@ class Model(object):
     # next signal
     self.nextSignal = Signal()
 
+    # read data json
+    self.imToRel = json.load(open('assets/img_to_rel_pos.json'))
+    self.export = json.load(open('assets/export.json'))
+
   def modelThread(self):
     logging.info("Thread %s: starting", self.name)
     
     while not self.exit:
       # MODEL CODE COMES HERE!!!!!
-      time.sleep(0.2)
-      # print("set model changed true")
+      time.sleep(MODEL_LOOP_TIME)
+      # print(self.gpsEmulationMode)
+
+      # run gps emulation
+      if self.gpsEmulationMode == "velocity":
+        if self.drivingDirection == "tf":
+          self.pos += (MODEL_LOOP_TIME/3600.0)*self.gpsEmulationVelocity
+        elif self.drivingDirection == "ft":
+          self.pos -= (MODEL_LOOP_TIME/3600.0)*self.gpsEmulationVelocity
+
       self.hasChanged = True
-      # self.view.update()
-      pass
 
     logging.info("Thread %s: finishing", self.name)
 
@@ -133,8 +147,8 @@ class Model(object):
     # TODO: implement signal logic
     self.nextSignal.fromTest()
     # TODO: implement time/distance calculation
-    self.nextSignal.timeTo -= 0.1
-    self.nextSignal.distanceTo -= 1
+    # self.nextSignal.timeTo -= 0.1
+    # self.nextSignal.distanceTo -= 1
     return self.nextSignal
 
   def getImageName(self):
@@ -162,7 +176,7 @@ class Model(object):
     return imInfoList
 
   def getMapLocation(self):
-    return [47.3775499,8.4666755]
+    return [self.lat,self.lon]
 
   def getChanged(self):
     if self.hasChanged:
@@ -182,20 +196,39 @@ class Model(object):
     self.drivingDirection = direction
 
   def calcCurrentImage(self):
-    # For now, just use a simple counter
+    # Search closest
+    nrst = 0
+    for dist in self.export['Relative Position']:
+      if self.export['Relative Position'][dist] > self.pos:
+        nrst = dist
+        break
+    self.currentImage = self.export['Closest Image'][nrst]
+    self.lat = self.export['Latitude'][nrst]
+    self.lon = self.export['Longitude'][nrst]
+
+    # print(nrst)
+    # print("found nearest. our %d theirs %d index %s" % (self.pos, self.export['Relative Position'][nrst], nrst))
+    # print("closest image: " + self.currentImage)
+    # print("lat %f lon %f" % (self.lat, self.lon))
+
     folder = DW_TO_DIR[self.drivingDirection+self.imgSource]
-    fname = ""
-    if folder is not None:
-      fname = ("%s/%s/image_%05d.jpg" % (TRACK_PIC_DIR, folder, self.tmpImage) )
-      self.currentImage = ("image_%05d.jpg" % (self.tmpImage))
-      # print("loading %s" % fname)
-    else:
-      # print("folder %s not found" % (folder))
-      pass
-    
+    fname = ("%s/%s/%s" % (TRACK_PIC_DIR, folder, self.currentImage) )
+
     if not os.path.isfile(fname):
       fname = IMG_NOT_FOUND
-    self.tmpImage += 1
+
+    # # For now, just use a simple counter
+    # folder = DW_TO_DIR[self.drivingDirection+self.imgSource]
+    # fname = ""
+    # if folder is not None:
+    #   fname = ("%s/%s/image_%05d.jpg" % (TRACK_PIC_DIR, folder, self.tmpImage) )
+    #   self.currentImage = ("image_%05d.jpg" % (self.tmpImage))
+    #   # print("loading %s" % fname)
+    # else:
+    #   # print("folder %s not found" % (folder))
+    #   pass
+    
+    # self.tmpImage += 1
     return fname
 
   def calcARSignalPosition(self):

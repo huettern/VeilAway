@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 15:54:58
+# @Last Modified time: 2020-09-19 18:31:19
 
 
 import logging
@@ -121,10 +121,10 @@ class DebugWindow(QDialog):
 
     # Velocity
     row += 1
-    layout.addWidget(QLabel("Velocity"),row,0,1,1)
+    layout.addWidget(QLabel("Velocity [kph]"),row,0,1,1)
     self.sbVelocity = QSpinBox()
     self.sbVelocity.setMinimum(0)
-    self.sbVelocity.setMaximum(100)
+    self.sbVelocity.setMaximum(400)
     self.sbVelocity.setValue(10)
     layout.addWidget(self.sbVelocity,row,1,1,1)
     self.sbVelocity.valueChanged.connect(self.cbGPSVelocityChange)
@@ -192,7 +192,7 @@ class DebugWindow(QDialog):
 
   def update(self, model):
     self.lblImageName.setText(model.currentImage)
-    self.lblPosition.setText("%.3fkm" % (model.pos/1000.0) )
+    self.lblPosition.setText("%.3fkm" % (model.pos) )
     self.lblLat.setText("%.5f" % model.lat)
     self.lblLon.setText("%.5f" % model.lon)
 
