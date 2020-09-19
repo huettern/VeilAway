@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 20:33:26
+# @Last Modified time: 2020-09-19 20:45:20
 
 
 import logging
@@ -22,13 +22,13 @@ from viewmap import MapWidget
 
 # view polling interval in [ms]
 VIEW_UPDATE_INTERVAL = 100
-MAP_UPDATE_INTERVAL = 1000
+MAP_UPDATE_INTERVAL = 2000
 
 class Window(QDialog):
 
   def __init__(self):
     super(Window, self).__init__()
-    self.mapUpdateCtr = 0
+    self.mapUpdateCtr = 99999
 
     layout = QGridLayout()
 

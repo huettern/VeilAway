@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 19:14:57
+# @Last Modified time: 2020-09-19 21:17:28
 
 # Media player source: https://stackoverflow.com/questions/57842104/how-to-play-videos-in-pyqt
 

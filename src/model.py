@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 20:24:37
+# @Last Modified time: 2020-09-19 21:15:42
 
 
 import logging
@@ -120,7 +120,7 @@ class Model(object):
     self.imToRel = json.load(open('assets/img_to_rel_pos.json'))
     self.dt_tf_nice = json.load(open('assets/export.json'))
     self.dt_tf_bad = None #json.load(open('assets/export.json'))
-    self.dt_ft_nice = json.load(open('assets/export.json'))
+    self.dt_ft_nice = json.load(open('assets/filisur_thusis.json'))
     self.dt_ft_bad = None #json.load(open('assets/export.json'))
     self.dt_tf_night = None #json.load(open('assets/export.json'))
     self.dt_ft_night = None #json.load(open('assets/export.json'))
@@ -162,7 +162,12 @@ class Model(object):
 
   def getNextSignal(self):
     # calculate distance to
-    self.nextSignal.distanceTo = max(0, self.nextSignal.relative - self.pos)
+    # forward search
+    if self.drivingDirection=="tf":
+      self.nextSignal.distanceTo = max(0, self.nextSignal.relative - self.pos)
+    else:
+      self.nextSignal.distanceTo = max(0, self.pos - self.nextSignal.relative)
+    # print("Mypos ",self.pos," next signal pos ", self.nextSignal.relative)
     self.nextSignal.timeTo = 3600 * self.nextSignal.distanceTo / self.gpsEmulationVelocity
     return self.nextSignal
 
@@ -231,16 +236,33 @@ class Model(object):
     # Search closest
     nrst = 0
     searchImg = True
-    for dist in dset['Relative Position']:
-      if searchImg and dset['Relative Position'][dist] > self.pos:
-        searchImg = False
-        self.currentImage = dset['Closest Image'][dist]
-        self.lat = dset['Latitude'][dist]
-        self.lon = dset['Longitude'][dist]
-      if dset['Element Type'][dist] in ['Main signal', 'Main & distant signal']:
-        if dset['Relative Position'][dist] > self.pos:
-          nrst = dist
-          break
+
+    # forward search
+    if self.drivingDirection=="tf":
+      for dist in dset['Relative Position']:
+        # print("List pos", dset['Relative Position'][dist], "our pos", self.pos)
+        if searchImg and dset['Relative Position'][dist] > self.pos:
+          searchImg = False
+          self.currentImage = dset['Closest Image'][dist]
+          self.lat = dset['Latitude'][dist]
+          self.lon = dset['Longitude'][dist]
+        if dset['Element Type'][dist] in ['Main signal', 'Main & distant signal']:
+          if dset['Relative Position'][dist] > self.pos:
+            nrst = dist
+            break
+    else:
+      # reverse search
+      for dist in dset['Relative Position']:
+        # print("List pos", dset['Relative Position'][dist], "our pos", self.pos)
+        if searchImg and dset['Relative Position'][dist] < self.pos:
+          searchImg = False
+          self.currentImage = dset['Closest Image'][dist]
+          self.lat = dset['Latitude'][dist]
+          self.lon = dset['Longitude'][dist]
+        if dset['Element Type'][dist] in ['Main signal', 'Main & distant signal']:
+          if dset['Relative Position'][dist] < self.pos:
+            nrst = dist
+            break
 
     if self.lastSignID == None or self.lastSignID != nrst:
       self.lastSignID = nrst
@@ -263,7 +285,12 @@ class Model(object):
       elif j['Element Type'] == 'Main & distant signal':
         sig.main = random.choice(SIGNAL_TYPES)
         sig.distant = random.choice(SIGNAL_TYPES)
-      self.lastDistanceToNext = max(0, sig.relative - self.lastSignLocation)
+
+      # forward search
+      if self.drivingDirection=="tf":
+        self.lastDistanceToNext = max(0, sig.relative - self.lastSignLocation)
+      else:
+        self.lastDistanceToNext = max(0, self.lastSignLocation - sig.relative)
 
       self.nextSignal = sig
       print("next signal: %s %s %s %f %s %s "%(nrst, j['ID'], j['Element Type'], j['Relative Position'], sig.main, sig.distant))
