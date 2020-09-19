@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 21:15:42
+# @Last Modified time: 2020-09-19 21:25:08
 
 
 import logging
@@ -119,10 +119,10 @@ class Model(object):
     # read data json
     self.imToRel = json.load(open('assets/img_to_rel_pos.json'))
     self.dt_tf_nice = json.load(open('assets/export.json'))
-    self.dt_tf_bad = None #json.load(open('assets/export.json'))
+    self.dt_tf_bad = json.load(open('assets/thusis_filisur_bad.json'))
     self.dt_ft_nice = json.load(open('assets/filisur_thusis.json'))
     self.dt_ft_bad = None #json.load(open('assets/export.json'))
-    self.dt_tf_night = None #json.load(open('assets/export.json'))
+    self.dt_tf_night = json.load(open('assets/thusis_filisur_night.json'))
     self.dt_ft_night = None #json.load(open('assets/export.json'))
 
     # road bounds
@@ -233,6 +233,9 @@ class Model(object):
       print("dataset not found")
       exit(1)
 
+    if dset is None:
+      return None
+    
     # Search closest
     nrst = 0
     searchImg = True
