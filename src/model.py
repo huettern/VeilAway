@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 20:22:07
+# @Last Modified time: 2020-09-19 20:24:37
 
 
 import logging
@@ -120,10 +120,10 @@ class Model(object):
     self.imToRel = json.load(open('assets/img_to_rel_pos.json'))
     self.dt_tf_nice = json.load(open('assets/export.json'))
     self.dt_tf_bad = None #json.load(open('assets/export.json'))
-    self.dt_ft_nice = None #json.load(open('assets/export.json'))
+    self.dt_ft_nice = json.load(open('assets/export.json'))
     self.dt_ft_bad = None #json.load(open('assets/export.json'))
     self.dt_tf_night = None #json.load(open('assets/export.json'))
-    self.dt_ft_nice = None #json.load(open('assets/export.json'))
+    self.dt_ft_night = None #json.load(open('assets/export.json'))
 
     # road bounds
     self.roadStart = ROAD_START

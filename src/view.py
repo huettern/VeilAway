@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 20:00:04
+# @Last Modified time: 2020-09-19 20:33:26
 
 
 import logging
@@ -137,7 +137,9 @@ class DebugWindow(QDialog):
     self.sliderPosition.setMinimum(0)
     self.sliderPosition.setMaximum(10000)
     layout.addWidget(self.sliderPosition,row,1,1,1)
-    self.sliderPosition.sliderReleased.connect(self.cbSliderValueChanged)
+    self.sliderIsPressed = False
+    self.sliderPosition.sliderReleased.connect(self.cbSliderReleased)
+    self.sliderPosition.sliderPressed.connect(self.cbSliderPressed)
     self.sliderPosition.sliderMoved.connect(self.cbSlideValueImmediate)
 
     # pos
@@ -159,7 +161,10 @@ class DebugWindow(QDialog):
     self.setLayout(layout)
     self.setWindowTitle("debug")
 
-  def cbSliderValueChanged(self):
+  def cbSliderPressed(self):
+    self.sliderIsPressed = True
+  def cbSliderReleased(self):
+    self.sliderIsPressed = False
     self.model.setSliderValue(self.sliderPosition.value(), self.sliderPosition.minimum(), self.sliderPosition.maximum())
 
   def cbSlideValueImmediate(self):
@@ -203,11 +208,12 @@ class DebugWindow(QDialog):
 
   def update(self, model):
     self.lblImageName.setText(model.currentImage)
-    self.lblPosition.setText("%.3fkm" % (model.pos) )
     self.lblLat.setText("%.5f" % model.lat)
     self.lblLon.setText("%.5f" % model.lon)
-    slider = (model.pos-model.roadStart)/model.roadStop*self.sliderPosition.maximum()
-    self.sliderPosition.setValue(slider)
+    slider = (model.pos-model.roadStart)/(model.roadStop-model.roadStart)*self.sliderPosition.maximum()+self.sliderPosition.minimum()
+    if not self.sliderIsPressed:
+        self.lblPosition.setText("%.3fkm" % (model.pos) )
+        self.sliderPosition.setValue(slider)
 
 class View(QObject):
   """docstring for Model"""
