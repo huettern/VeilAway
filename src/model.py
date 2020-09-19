@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 19:56:34
+# @Last Modified time: 2020-09-19 20:22:07
 
 
 import logging
@@ -118,7 +118,12 @@ class Model(object):
 
     # read data json
     self.imToRel = json.load(open('assets/img_to_rel_pos.json'))
-    self.export = json.load(open('assets/export.json'))
+    self.dt_tf_nice = json.load(open('assets/export.json'))
+    self.dt_tf_bad = None #json.load(open('assets/export.json'))
+    self.dt_ft_nice = None #json.load(open('assets/export.json'))
+    self.dt_ft_bad = None #json.load(open('assets/export.json'))
+    self.dt_tf_night = None #json.load(open('assets/export.json'))
+    self.dt_ft_nice = None #json.load(open('assets/export.json'))
 
     # road bounds
     self.roadStart = ROAD_START
@@ -206,22 +211,34 @@ class Model(object):
     self.drivingDirection = direction
 
   def calcCurrentImage(self):
+    # get traversal direction
+    if   self.drivingDirection=="tf" and self.imgSource == "g":
+      dset = self.dt_tf_nice
+    elif self.drivingDirection=="tf" and self.imgSource == "b":
+      dset = self.dt_tf_bad
+    elif self.drivingDirection=="ft" and self.imgSource == "g":
+      dset = self.dt_ft_nice
+    elif self.drivingDirection=="ft" and self.imgSource == "b":
+      dset = self.dt_ft_bad
+    elif self.drivingDirection=="ft" and self.imgSource == "n":
+      dset = self.dt_ft_night
+    elif self.drivingDirection=="tf" and self.imgSource == "n":
+      dset = self.dt_tf_night
+    else:
+      print("dataset not found")
+      exit(1)
+
     # Search closest
     nrst = 0
-    for dist in self.export['Relative Position']:
-      if self.export['Relative Position'][dist] > self.pos:
-        nrst = dist
-        break
-    self.currentImage = self.export['Closest Image'][nrst]
-    self.lat = self.export['Latitude'][nrst]
-    self.lon = self.export['Longitude'][nrst]
-
-    # signal
-    nrst = 0
-    for dist in self.export['Relative Position']:
-      if self.export['Element Type'][dist] in ['Main signal', 'Main & distant signal']:
-        # print('asdfasdf')
-        if self.export['Relative Position'][dist] > self.pos:
+    searchImg = True
+    for dist in dset['Relative Position']:
+      if searchImg and dset['Relative Position'][dist] > self.pos:
+        searchImg = False
+        self.currentImage = dset['Closest Image'][dist]
+        self.lat = dset['Latitude'][dist]
+        self.lon = dset['Longitude'][dist]
+      if dset['Element Type'][dist] in ['Main signal', 'Main & distant signal']:
+        if dset['Relative Position'][dist] > self.pos:
           nrst = dist
           break
 
@@ -230,13 +247,13 @@ class Model(object):
       self.lastSignLocation = self.nextSignal.relative
 
       j = {}
-      j['ID'] = self.export['ID'][nrst]
-      j['Element Type'] = self.export['Element Type'][nrst]
-      j['Additional Information'] = self.export['Additional Information'][nrst]
-      j['Notes'] = self.export['Notes'][nrst]
-      j['Latitude'] = self.export['Latitude'][nrst]
-      j['Longitude'] = self.export['Longitude'][nrst]
-      j['Relative Position'] = self.export['Relative Position'][nrst]
+      j['ID'] = dset['ID'][nrst]
+      j['Element Type'] = dset['Element Type'][nrst]
+      j['Additional Information'] = dset['Additional Information'][nrst]
+      j['Notes'] = dset['Notes'][nrst]
+      j['Latitude'] = dset['Latitude'][nrst]
+      j['Longitude'] = dset['Longitude'][nrst]
+      j['Relative Position'] = dset['Relative Position'][nrst]
       
       sig = Signal()
       sig.fromJson(j)
@@ -252,7 +269,7 @@ class Model(object):
       print("next signal: %s %s %s %f %s %s "%(nrst, j['ID'], j['Element Type'], j['Relative Position'], sig.main, sig.distant))
 
     # print(nrst)
-    # print("found nearest. our %d theirs %d index %s" % (self.pos, self.export['Relative Position'][nrst], nrst))
+    # print("found nearest. our %d theirs %d index %s" % (self.pos, dset['Relative Position'][nrst], nrst))
     # print("closest image: " + self.currentImage)
     # print("lat %f lon %f" % (self.lat, self.lon))
 
