@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 09:34:16
+# @Last Modified time: 2020-09-19 20:42:15
 
 import io
 import folium
@@ -11,6 +11,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QFrame
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets, QtWebEngineWidgets
 from PyQt5 import QtGui
+
+tk = "pk.eyJ1IjoiYmVlYmxlNDJicm94IiwiYSI6ImNrZmEwbzU2aTByN3oyem1hNGNsbmgyZ2YifQ.Wd6RYuQR8YQYWl21tzadEg"
+tileurl = 'https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=' + str(tk)
 
 class MapWidget(QWidget):
   """docstring for MapWidget"""
@@ -28,6 +31,13 @@ class MapWidget(QWidget):
     m = folium.Map(
         location=[46.6807711,9.6756752], tiles="Stamen Toner", zoom_start=13
     )
+    self.tile = folium.TileLayer(
+        tiles = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attr = 'Esri',
+        name = 'Esri Satellite',
+        overlay = False,
+        control = True
+    ).add_to(m)
 
     data = io.BytesIO()
     m.save(data, close_file=False)
@@ -51,9 +61,9 @@ class MapWidget(QWidget):
     coordinates = model.getMapLocation()
 
     m = folium.Map(
-        location=coordinates, tiles="Stamen Toner", zoom_start=13
+        location=coordinates, tiles="Stamen Toner", zoom_start=15
     )
-
+    self.tile.add_to(m)
 
     folium.Marker(coordinates).add_to(m)
 
