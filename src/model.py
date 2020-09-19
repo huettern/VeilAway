@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 21:25:08
+# @Last Modified time: 2020-09-19 22:07:01
 
 
 import logging
@@ -26,7 +26,7 @@ SIGNAL_IMG_DIR = "assets/signals/png/120"
 
 SIGNAL_TYPES = ["40", "60", "90", "stop", "vmax"]
 
-MODEL_LOOP_TIME = 0.2 # s
+MODEL_LOOP_TIME = 0.01 # s
 
 ROAD_START = 41.111
 ROAD_STOP = 65.365
@@ -144,6 +144,7 @@ class Model(object):
       if self.gpsEmulationMode == "velocity":
         if self.drivingDirection == "tf":
           self.pos += (MODEL_LOOP_TIME/3600.0)*self.gpsEmulationVelocity
+          self.pos = min(self.pos, 65.0)
         elif self.drivingDirection == "ft":
           self.pos -= (MODEL_LOOP_TIME/3600.0)*self.gpsEmulationVelocity
 
@@ -330,7 +331,7 @@ class Model(object):
   def setSliderValue(self, slider, mn, mx):
     print("Model: slider set to %d in (%d %d)" % (slider, mn, mx) )
     newpos = (ROAD_STOP-ROAD_START)*(slider/(mx-mn))+ROAD_START
-    self.pos = newpos
+    self.pos = min(newpos, 65.0)
     self.hasChanged = True
 
 if __name__ == "__main__":
