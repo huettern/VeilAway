@@ -38,7 +38,7 @@ with open(os.path.realpath('export.geojson')) as f:
     gj = geojson.load(f)
 
 # Keep only polyline
-gj['features'] = [gj['features'][0]]
+gj['features'] = [gj['features'][2]]
 df2=pd.DataFrame()
 for feat in gj['features']:
         if (feat['geometry']['type'] == 'Point'):
@@ -47,9 +47,8 @@ for feat in gj['features']:
             #df2 = pd.concat([df2,df_new])
         else:
             for coord in feat['geometry']['coordinates']:
-                for elem in coord:
-                    df_new = pd.DataFrame([[elem[0], elem[1], 'geojson']], columns=['Longitude', 'Latitude', 'Element Type'])
-                    df2 = pd.concat([df2,df_new])
+                df_new = pd.DataFrame([[coord[0], coord[1], 'geojson']], columns=['Longitude', 'Latitude', 'Element Type'])
+                df2 = pd.concat([df2, df_new])
 
 #Find out what the closest points are
 # minval = np.inf
@@ -61,9 +60,9 @@ for feat in gj['features']:
 #         testdis[coord] = gpd.distance(testpos, pos).km
 #     mindistidx = np.argmin(testdis)
 #     if(testdis[mindistidx] < minval):
-#         print(idx)#=3
-#         print(mindistidx) #=1176
-#         print(testdis[mindistidx]) #=0.0013700454574739364
+#         print(idx)#=237
+#         print(mindistidx) #=649
+#         print(testdis[mindistidx]) #0.0010567557775868317
 #         minval = testdis[mindistidx]
 
 
@@ -75,20 +74,18 @@ for coord in range(1,df2.values.shape[0]):
     dis[coord] = gpd.distance(posold, pos).km + dis[coord-1]
     posold=pos
 
-dis = dis - np.ones_like(dis)*(dis[1176]-df['Relative Position'].values[3]) #correct offset
+dis = dis - np.ones_like(dis)*(dis[649]-df['Relative Position'].values[237]) #correct offset
 
-df2['Relative Position'] = dis;
-
-f_lat = interpolate.interp1d(rp[np.isfinite(lat)], lat[np.isfinite(lat)], fill_value='extrapolate')
-f_lon = interpolate.interp1d(rp[np.isfinite(lon)], lon[np.isfinite(lon)], fill_value='extrapolate')
-latint = f_lat(rp)
-lonint = f_lon(rp)
+df2['Relative Position'] = dis
 
 df = pd.concat([df,df2])
+df = df.sort_values(by=['Relative Position'])
+df = df[df['Relative Position']>40]
+df = df[df['Relative Position']<65.5]
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     m = folium.Map(
-        location=[np.mean(latint), np.mean(lonint)], zoom_start=13
+        location=[np.mean(lat[np.isfinite(lat)]), np.mean(lon[np.isfinite(lat)])], zoom_start=13
     )
 
     data = io.BytesIO()
@@ -119,4 +116,4 @@ if __name__ == "__main__":
 
 
 
-    sys.exit(app.exec_())
+    #sys.exit(app.exec_())
