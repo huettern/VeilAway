@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 11:31:07
+# @Last Modified time: 2020-09-19 13:39:22
 
 
 import logging
@@ -21,6 +21,63 @@ DW_TO_DIR = {
 IMG_NOT_FOUND = "assets/imnotfound.png"
 
 SIGNAL_IMG_DIR = "assets/signals/png"
+
+SIGNAL_TYPES = ["40", "60", "90", "stop", "vmax"]
+
+
+def relativeToCoordinates(rel):
+  print("TODO: UNIMPLEMENTED")
+  return [47.3775499,8.4666755]
+
+def coordinatesToRelative(c):
+  print("TODO: UNIMPLEMENTED")
+  return 12123
+
+
+class Signal(object):
+  def __init__(self):
+    self.distant = None # can be None or any of SIGNAL_TYPES
+    self.main = None # can be None or any of SIGNAL_TYPES
+    self.id = None
+    self.elementType = None
+    self.coordinates = [0,0]
+    self.relative = 0 # in km
+
+    # Items to display
+    self.timeTo = 30 # s
+    self.distanceTo = 1000 # m
+
+  def fromJson(self, j):
+    if 'ID' in j.keys():
+      self.id = j['ID']
+    else:
+      print("CRITICAL: sign has no ID")
+
+    if 'Element Type' in j.keys():
+      self.elementType = j['Element Type']
+    
+    hRel, hCo = False, False
+    if 'Relative Position' in j.keys():
+      hRel = True
+      self.relative = j['Relative Position']
+    if ('Latitude' in j.keys()) and ('Longitude' in j.keys()):
+      hCo = True
+      self.coordinates = [j['Latitude'], j['Longitude']]
+
+    # calculate missing
+    if not hRel:
+      self.relative = coordinatesToRelative(self.coordinates)
+    if not hCo:
+      self.coordinates = relativeToCoordinates(self.relative)
+
+  def fromTest(self):
+    self.distant = SIGNAL_TYPES[3] # can be None or any of SIGNAL_TYPES
+    self.main = SIGNAL_TYPES[0] # can be None or any of SIGNAL_TYPES
+    self.id = "C5"
+    self.elementType = "Main & distant signal"
+    self.coordinates = [46.69915247,9.44028485]
+    self.relative = 41.128
+
 
 class Model(object):
   """docstring for Model"""
@@ -41,6 +98,9 @@ class Model(object):
     self.pos = 23000
     self.lat = 42
     self.lon = 8
+
+    # next signal
+    self.nextSignal = Signal()
 
   def modelThread(self):
     logging.info("Thread %s: starting", self.name)
@@ -63,6 +123,14 @@ class Model(object):
 
   def getSignalName(self):
     return "Signal Name"
+
+  def getNextSignal(self):
+    # TODO: implement signal logic
+    self.nextSignal.fromTest()
+    # TODO: implement time/distance calculation
+    self.nextSignal.timeTo -= 0.1
+    self.nextSignal.distanceTo -= 1
+    return self.nextSignal
 
   def getImageName(self):
     im = self.calcCurrentImage()

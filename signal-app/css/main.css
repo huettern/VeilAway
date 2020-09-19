@@ -1,0 +1,61 @@
+/* ==========================================================================
+   Custom styles
+   ========================================================================== */
+
+.navbar {
+    position: relative;
+}
+
+.blockpart {
+    padding: 1.5rem 1.25rem;
+    margin-bottom: 1rem;
+}
+
+p {
+    font-size: 1.8rem;
+}
+
+.name {
+    position: absolute;
+}
+
+.value {
+    position: relative;
+    margin-left: 50%;
+    font-weight: 600;
+    letter-spacing: 3px;
+    font-size: 3rem;
+}
+
+.textnextsignal {
+    padding-left: 0 !important;
+    position: absolute;
+}
+
+.imagenextsignal {
+    width: inherit;
+    position: relative;
+    margin-left: 70%;
+}
+
+.imagenextsignal img {
+    width: 6rem;
+}
+
+.map img {
+    width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
