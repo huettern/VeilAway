@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 16:04:10
+# @Last Modified time: 2020-09-19 19:14:57
 
 # Media player source: https://stackoverflow.com/questions/57842104/how-to-play-videos-in-pyqt
 
@@ -56,9 +56,9 @@ class VideoWidget(QWidget):
     if PBAR_ENABLE:
         start = model.lastSignLocation
         stop = start + model.lastDistanceToNext
-        self.pbar.setRange(start,stop)
-        self.pbar.setValue(stop-model.nextSignal.distanceTo)
-        # print("star %d stop %d value %d" % (start, stop, stop-model.nextSignal.distanceTo))
+        self.pbar.setRange(100*start,100*stop)
+        self.pbar.setValue(100*(stop-model.nextSignal.distanceTo))
+        # print("start %f stop %f value %f" % (start, stop, stop-model.nextSignal.distanceTo))
 
 
     # pm = QPixmap(img_fname)

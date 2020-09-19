@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 15:59:34
+# @Last Modified time: 2020-09-19 19:07:15
 
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
@@ -46,7 +46,7 @@ class SignalWidget(QWidget):
     hours, remainder = divmod(s, 3600)
     minutes, seconds = divmod(remainder, 60)
     timestring = '{:02}:{:02}'.format(int(minutes), int(seconds))
-    distancestring = "%.2f km" % (self.sig.distanceTo/1000.0)
+    distancestring = "%.2f km" % (self.sig.distanceTo)
     
     script  = ("document.getElementById(\"timevalue\").innerHTML = \"%s\";" % (timestring))
     script += ("document.getElementById(\"distancevalue\").innerHTML = \"%s\";" % (distancestring))

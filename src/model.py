@@ -2,13 +2,14 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 18:32:04
+# @Last Modified time: 2020-09-19 19:15:12
 
 
 import logging
 import time
 import json
 import os
+import random
 
 TRACK_PIC_DIR = "/home/noah/Trackpictures"
 DW_TO_DIR = {
@@ -105,7 +106,8 @@ class Model(object):
     self.currentImage = 'image_00101.jpg'
 
     # last signal
-    self.lastSignLocation = 23300
+    self.lastSignID = None
+    self.lastSignLocation = self.pos
     self.lastDistanceToNext = 1000
 
     # next signal
@@ -114,6 +116,9 @@ class Model(object):
     # read data json
     self.imToRel = json.load(open('assets/img_to_rel_pos.json'))
     self.export = json.load(open('assets/export.json'))
+
+    # seed rnd
+    random.seed(42)
 
   def modelThread(self):
     logging.info("Thread %s: starting", self.name)
@@ -144,11 +149,9 @@ class Model(object):
     return "Signal Name"
 
   def getNextSignal(self):
-    # TODO: implement signal logic
-    self.nextSignal.fromTest()
-    # TODO: implement time/distance calculation
-    # self.nextSignal.timeTo -= 0.1
-    # self.nextSignal.distanceTo -= 1
+    # calculate distance to
+    self.nextSignal.distanceTo = max(0, self.nextSignal.relative - self.pos)
+    self.nextSignal.timeTo = 3600 * self.nextSignal.distanceTo / self.gpsEmulationVelocity
     return self.nextSignal
 
   def getImageName(self):
@@ -205,6 +208,41 @@ class Model(object):
     self.currentImage = self.export['Closest Image'][nrst]
     self.lat = self.export['Latitude'][nrst]
     self.lon = self.export['Longitude'][nrst]
+
+    # signal
+    nrst = 0
+    for dist in self.export['Relative Position']:
+      if self.export['Element Type'][dist] in ['Main signal', 'Main & distant signal']:
+        # print('asdfasdf')
+        if self.export['Relative Position'][dist] > self.pos:
+          nrst = dist
+          break
+
+    if self.lastSignID == None or self.lastSignID != nrst:
+      self.lastSignID = nrst
+      self.lastSignLocation = self.nextSignal.relative
+
+      j = {}
+      j['ID'] = self.export['ID'][nrst]
+      j['Element Type'] = self.export['Element Type'][nrst]
+      j['Additional Information'] = self.export['Additional Information'][nrst]
+      j['Notes'] = self.export['Notes'][nrst]
+      j['Latitude'] = self.export['Latitude'][nrst]
+      j['Longitude'] = self.export['Longitude'][nrst]
+      j['Relative Position'] = self.export['Relative Position'][nrst]
+      
+      sig = Signal()
+      sig.fromJson(j)
+      # set random state on singal
+      if j['Element Type'] == 'Main signal':
+        sig.main = random.choice(SIGNAL_TYPES)
+      elif j['Element Type'] == 'Main & distant signal':
+        sig.main = random.choice(SIGNAL_TYPES)
+        sig.distant = random.choice(SIGNAL_TYPES)
+      self.lastDistanceToNext = max(0, sig.relative - self.lastSignLocation)
+
+      self.nextSignal = sig
+      print("next signal: %s %s %s %f %s %s "%(nrst, j['ID'], j['Element Type'], j['Relative Position'], sig.main, sig.distant))
 
     # print(nrst)
     # print("found nearest. our %d theirs %d index %s" % (self.pos, self.export['Relative Position'][nrst], nrst))

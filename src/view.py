@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 18:31:19
+# @Last Modified time: 2020-09-19 18:49:37
 
 
 import logging
@@ -115,7 +115,7 @@ class DebugWindow(QDialog):
     # GPS mode
     row += 1
     layout.addWidget(QLabel("GPS mode"),row,0,1,1)
-    self.btnGPSMode = QPushButton("Play")
+    self.btnGPSMode = QPushButton("Pause")
     layout.addWidget(self.btnGPSMode,row,1,1,1)
     self.btnGPSMode.clicked.connect(self.cbGPSModeChange)
 
@@ -125,7 +125,7 @@ class DebugWindow(QDialog):
     self.sbVelocity = QSpinBox()
     self.sbVelocity.setMinimum(0)
     self.sbVelocity.setMaximum(400)
-    self.sbVelocity.setValue(10)
+    self.sbVelocity.setValue(80)
     layout.addWidget(self.sbVelocity,row,1,1,1)
     self.sbVelocity.valueChanged.connect(self.cbGPSVelocityChange)
 
@@ -163,6 +163,7 @@ class DebugWindow(QDialog):
     self.model.gpsEmulationVelocity = velocity
 
   def cbGPSModeChange(self):
+    self.model.gpsEmulationVelocity = self.sbVelocity.value()
     if self.btnGPSMode.text() == "Play":
       self.btnGPSMode.setText("Pause")
       self.model.gpsEmulationMode = "static"
