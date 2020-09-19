@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 18:49:37
+# @Last Modified time: 2020-09-19 20:00:04
 
 
 import logging
@@ -74,7 +74,7 @@ class DebugWindow(QDialog):
     self.horizontalGroupBox = QGroupBox("Grid")
     layout = QGridLayout()
 
-    layout.setColumnStretch(0, 5)
+    layout.setColumnStretch(0, 0)
     layout.setColumnStretch(1, 5)
     layout.setRowStretch(0, 5)
     layout.setRowStretch(1, 5)
@@ -134,8 +134,11 @@ class DebugWindow(QDialog):
     layout.addWidget(QLabel("Postion"),row,0,1,1)
     self.sliderPosition = QSlider()
     self.sliderPosition.setOrientation(QtCore.Qt.Orientation(1))
+    self.sliderPosition.setMinimum(0)
+    self.sliderPosition.setMaximum(10000)
     layout.addWidget(self.sliderPosition,row,1,1,1)
     self.sliderPosition.sliderReleased.connect(self.cbSliderValueChanged)
+    self.sliderPosition.sliderMoved.connect(self.cbSlideValueImmediate)
 
     # pos
     row += 1
@@ -158,6 +161,13 @@ class DebugWindow(QDialog):
 
   def cbSliderValueChanged(self):
     self.model.setSliderValue(self.sliderPosition.value(), self.sliderPosition.minimum(), self.sliderPosition.maximum())
+
+  def cbSlideValueImmediate(self):
+    slider = self.sliderPosition.value()
+    mn = self.sliderPosition.minimum()
+    mx = self.sliderPosition.maximum()
+    newpos = (self.model.roadStop-self.model.roadStart)*(slider/(mx-mn))+self.model.roadStart
+    self.lblPosition.setText("%.3fkm" % (newpos) )
 
   def cbGPSVelocityChange(self, velocity):
     self.model.gpsEmulationVelocity = velocity
@@ -196,6 +206,8 @@ class DebugWindow(QDialog):
     self.lblPosition.setText("%.3fkm" % (model.pos) )
     self.lblLat.setText("%.5f" % model.lat)
     self.lblLon.setText("%.5f" % model.lon)
+    slider = (model.pos-model.roadStart)/model.roadStop*self.sliderPosition.maximum()
+    self.sliderPosition.setValue(slider)
 
 class View(QObject):
   """docstring for Model"""

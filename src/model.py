@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 19:15:12
+# @Last Modified time: 2020-09-19 19:56:34
 
 
 import logging
@@ -27,6 +27,9 @@ SIGNAL_IMG_DIR = "assets/signals/png/120"
 SIGNAL_TYPES = ["40", "60", "90", "stop", "vmax"]
 
 MODEL_LOOP_TIME = 0.2 # s
+
+ROAD_START = 41.111
+ROAD_STOP = 65.365
 
 
 def relativeToCoordinates(rel):
@@ -100,7 +103,7 @@ class Model(object):
     self.gpsEmulationVelocity = 10 # km/h
 
     # current vehicle position
-    self.pos = 41.111 # km
+    self.pos = ROAD_START # km
     self.lat = 46.6981226
     self.lon = 9.4412016
     self.currentImage = 'image_00101.jpg'
@@ -116,6 +119,10 @@ class Model(object):
     # read data json
     self.imToRel = json.load(open('assets/img_to_rel_pos.json'))
     self.export = json.load(open('assets/export.json'))
+
+    # road bounds
+    self.roadStart = ROAD_START
+    self.roadStop = ROAD_STOP    
 
     # seed rnd
     random.seed(42)
@@ -275,6 +282,9 @@ class Model(object):
 
   def setSliderValue(self, slider, mn, mx):
     print("Model: slider set to %d in (%d %d)" % (slider, mn, mx) )
+    newpos = (ROAD_STOP-ROAD_START)*(slider/(mx-mn))+ROAD_START
+    self.pos = newpos
+    self.hasChanged = True
 
 if __name__ == "__main__":
   print("model main()")
