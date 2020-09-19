@@ -6,6 +6,7 @@ from scipy import spatial
 import io
 import sys
 import folium
+import re
 from PyQt5 import QtWidgets, QtWebEngineWidgets
 
 import gpxpy
@@ -137,15 +138,18 @@ if __name__ == "__main__":
     dfobj = pd.read_excel(os.path.realpath('TrackSiteData_2020_clean.xlsx'), index_col=None)
     gj = read_geojson('export.geojson')
     dfgj = geojson_to_df(gj)
-    dfobjgj = concat_interp([dfobj, dfgj]).reset_index()
+    dfobjgj = concat_interp([dfobj, dfgj]).reset_index(drop=True)
     tree_dist = init_gps_dist_tree(dfobjgj)
     dfimg = pd.DataFrame(read_track_from_exif_images(path_to_images_thusis_filisur))
     closest_gps_points = gps_to_dist(dfimg[['GPSLatitude', 'GPSLongitude']].to_numpy().reshape([-1,2]), tree_dist)
     print(np.max(closest_gps_points[0]))#max approx error
-    closest_gps_points, idx_closest_gps_points, inv_closest_gps_points = np.unique(closest_gps_points[1], return_index=True, return_inverse=True)
+    closest_gps_points_unique, idx_closest_gps_points_unique, inv_closest_gps_points_unique = np.unique(closest_gps_points[1], return_index=True, return_inverse=True)
+    pic = dict(zip(closest_gps_points_unique, dfimg['ImgName'][idx_closest_gps_points_unique]))
+    dfobjgj['Closest Image'] = np.zeros_like(dfobjgj['Relative Position'].to_numpy())
+    dfobjgj['Closest Image'][pic.keys()] = pic
+    imagenums = dfobjgj['Closest Image'].str.extract('(\d+)')
 
-    pic = pd.Series(dfimg['ImgName'][idx_closest_gps_points], index=closest_gps_points)
-    dfobjgj['Closest Image'] = pic
+
     folium.GeoJson(
         gj,
         name='geojson'
