@@ -2,17 +2,18 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 10:11:07
+# @Last Modified time: 2020-09-19 11:39:06
 
 
 import logging
 import time
 import sys
 
-from PyQt5.QtWidgets import QComboBox, QApplication, QWidget, QPushButton, QHBoxLayout, QGroupBox, QDialog, QVBoxLayout, QGridLayout, QLabel
+from PyQt5.QtWidgets import QPushButton, QSpinBox, QSlider, QComboBox, QApplication, QWidget, QPushButton, QHBoxLayout, QGroupBox, QDialog, QVBoxLayout, QGridLayout, QLabel, QCheckBox
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSlot, QTimer, QObject
+from PyQt5 import QtCore
 
 # custom widgets
 from viewvideo import VideoWidget
@@ -90,7 +91,7 @@ class DebugWindow(QDialog):
 
 
     # direction select
-    row = 1
+    row += 1
     layout.addWidget(QLabel("Direction"),row,0,1,1)
     self.cbDirection = QComboBox()
     self.cbDirection.addItem("Thusis -> Filisur")
@@ -99,14 +100,76 @@ class DebugWindow(QDialog):
     self.cbDirection.currentIndexChanged.connect(self.cbDirChange)
 
     # im name
-    row = 2
+    row += 1
     layout.addWidget(QLabel("Image"),row,0,1,1)
     self.lblImageName = QLabel()
     layout.addWidget(self.lblImageName,row,1,1,1)
 
+    # overlay
+    row += 1
+    layout.addWidget(QLabel("Overlay"),row,0,1,1)
+    self.checkboxOverlay = QCheckBox()
+    layout.addWidget(self.checkboxOverlay,row,1,1,1)
+    self.checkboxOverlay.stateChanged.connect(self.cbOverlay)
+
+    # GPS mode
+    row += 1
+    layout.addWidget(QLabel("GPS mode"),row,0,1,1)
+    self.btnGPSMode = QPushButton("Play")
+    layout.addWidget(self.btnGPSMode,row,1,1,1)
+    self.btnGPSMode.clicked.connect(self.cbGPSModeChange)
+
+    # Velocity
+    row += 1
+    layout.addWidget(QLabel("Velocity"),row,0,1,1)
+    self.sbVelocity = QSpinBox()
+    self.sbVelocity.setMinimum(0)
+    self.sbVelocity.setMaximum(100)
+    self.sbVelocity.setValue(10)
+    layout.addWidget(self.sbVelocity,row,1,1,1)
+    self.sbVelocity.valueChanged.connect(self.cbGPSVelocityChange)
+
+    # Position slider
+    row += 1
+    layout.addWidget(QLabel("Postion"),row,0,1,1)
+    self.sliderPosition = QSlider()
+    self.sliderPosition.setOrientation(QtCore.Qt.Orientation(1))
+    layout.addWidget(self.sliderPosition,row,1,1,1)
+    self.sliderPosition.sliderReleased.connect(self.cbSliderValueChanged)
+
+    # pos
+    row += 1
+    layout.addWidget(QLabel("Position"),row,0,1,1)
+    self.lblPosition = QLabel()
+    layout.addWidget(self.lblPosition,row,1,1,1)
+    # lat
+    row += 1
+    layout.addWidget(QLabel("Lat"),row,0,1,1)
+    self.lblLat = QLabel()
+    layout.addWidget(self.lblLat,row,1,1,1)
+    # lon
+    row += 1
+    layout.addWidget(QLabel("Long"),row,0,1,1)
+    self.lblLon = QLabel()
+    layout.addWidget(self.lblLon,row,1,1,1)
+
     self.setLayout(layout)
     self.setWindowTitle("debug")
-  
+
+  def cbSliderValueChanged(self):
+    self.model.setSliderValue(self.sliderPosition.value(), self.sliderPosition.minimum(), self.sliderPosition.maximum())
+
+  def cbGPSVelocityChange(self, velocity):
+    self.model.gpsEmulationVelocity = velocity
+
+  def cbGPSModeChange(self):
+    if self.btnGPSMode.text() == "Play":
+      self.btnGPSMode.setText("Pause")
+      self.model.gpsEmulationMode = "static"
+    elif self.btnGPSMode.text() == "Pause":
+      self.btnGPSMode.setText("Play")
+      self.model.gpsEmulationMode = "velocity"
+    
   def cbImgChange(self, idx):
     if idx == 0:
       # good weather
@@ -124,8 +187,14 @@ class DebugWindow(QDialog):
     elif idx == 1:
       self.model.setDirection("ft")
 
+  def cbOverlay(self):
+    self.model.overlayEnabled = self.checkboxOverlay.isChecked()
+
   def update(self, model):
     self.lblImageName.setText(model.currentImage)
+    self.lblPosition.setText("%.3fkm" % (model.pos/1000.0) )
+    self.lblLat.setText("%.5f" % model.lat)
+    self.lblLon.setText("%.5f" % model.lon)
 
 class View(QObject):
   """docstring for Model"""

@@ -2,11 +2,11 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 01:13:29
+# @Last Modified time: 2020-09-19 10:43:53
 
 # Media player source: https://stackoverflow.com/questions/57842104/how-to-play-videos-in-pyqt
 
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+from PyQt5.QtGui import QIcon, QFont, QPixmap, QImage, QPainter
 from PyQt5.QtCore import QDir, Qt, QUrl, QSize
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -18,71 +18,32 @@ class VideoWidget(QWidget):
   """docstring for VideoWidget"""
   def __init__(self, mainview):
     super(VideoWidget, self).__init__(mainview)
-    # QWidget.__init__(self)
-
-    # self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-    # videoWidget = QVideoWidget()
-
-
     layout = QVBoxLayout()
-    # layout.addWidget(videoWidget)
-    # layout.addLayout(controlLayout)
-    # layout.addWidget(self.statusBar)
-
     self.pic = QLabel(self)
     self.pic.setPixmap(QPixmap("/home/noah/Trackpictures/nice_weather/nice_weather_thusis_filisur_20200827_pixelated/image_05000.jpg"))
     layout.addWidget(self.pic)
     self.setLayout(layout)
 
-    # self.mediaPlayer.setVideoOutput(videoWidget)
-
-    # fileName = "/home/noah/Downloads/video.mp4"
-    # if fileName != '':
-    #   print("------------------------------")
-    #   self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(fileName)))
-    #   self.play()
-    # self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
-    # self.mediaPlayer.positionChanged.connect(self.positionChanged)
-    # self.mediaPlayer.durationChanged.connect(self.durationChanged)
-    # self.mediaPlayer.error.connect(self.handleError)
-
-    # self.mainLayout = QVBoxLayout(self)
-    # self.mainLayout.addWidget(QLabel("Video"))
-    # self.setLayout(self.mainLayout)
-
-  # def play(self):
-  #   if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-  #     print("pause")
-  #     self.mediaPlayer.pause()
-  #   else:
-  #     print("play")
-  #     self.mediaPlayer.play()
-
-  # def mediaStateChanged(self, state):
-  #   print("mediaStateChanged")
-  #   # if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-  #   #   self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
-  #   # else:
-  #   #   self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
-
-  # def positionChanged(self, position):
-  #   print("positionChanged")
-  #   # print("position changed" + str(position))
-  #   # self.positionSlider.setValue(position)
-
-  # def durationChanged(self, duration):
-  #   print("durationChanged")
-  #   # print("position changed" + str(position))
-  #   # self.positionSlider.setRange(0, duration)
-
-  # def setPosition(self, position):
-  #   self.mediaPlayer.setPosition(position)
-
-  # def handleError(self):
-  #   # self.playButton.setEnabled(False)
-  #   self.statusBar.showMessage("Error: " + self.mediaPlayer.errorString())
-
   def update(self, model):
     img_fname = model.getImageName()
-    self.pic.setPixmap(QPixmap(img_fname))
-    pass
+    arImg = model.getARImageInfo()
+
+    image = QImage(img_fname)
+    
+    if arImg['show']:
+      overlay = QImage(arImg['fname'])
+
+    painter = QPainter()
+    painter.begin(image)
+    if arImg['show']:
+      painter.drawImage(image.width()/2+arImg['loc_x'], image.height()/2+arImg['loc_y'], overlay)
+    painter.end()
+     
+    # label = QLabel()
+    self.pic.setPixmap(QPixmap.fromImage(image))
+    # label.show()
+
+    # pm = QPixmap(img_fname)
+    
+
+    # self.pic.setPixmap(pm)
