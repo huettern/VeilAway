@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import piexif
 import os
 import pandas as pd
@@ -9,45 +9,37 @@ from PyQt5 import QtWidgets, QtWebEngineWidgets
 import sys
 import io
 
-class SbbTrain:
-    def __init__(self, long=0, lat=0, speed=0):
-        self.lat = 0
-        self.long = 0
-        self.speed = 0
-
-    def set_new_pos(self, long, lat):
-        self.long = long
-        self.lat = lat
-
-    def set_new_speed(self, speed):
-        self.speed = speed
-
-
-class GpsEmulator:
-    pass
-
 
 def read_track_from_exif_images(path_to_images):
     images = os.listdir(path_to_images)
     images = [img for img in images if img[-4:] == ".jpg"]
     gps_measurements = pd.DataFrame()
+
     for img in images:
         exif_dict = piexif.load(os.path.join(path_to_images, img))
-        gps_measurements = gps_measurements.append(exif_dict['GPS'], ignore_index=True)
+        row_dict = exif_dict['GPS']
+        row_dict["ImgName"] = img
+        gps_measurements = gps_measurements.append(row_dict, ignore_index=True)
+
     column_names = []
     for tag in gps_measurements.columns:
-        column_names.append(piexif.TAGS['GPS'][tag]["name"])
+        if tag != "ImgName":
+            column_names.append(piexif.TAGS['GPS'][tag]["name"])
+        else:
+            column_names.append("ImgName")
+
     gps_measurements.columns = column_names
     gps_measurements['GPSLatitude'] = gps_measurements['GPSLatitude'].map(lambda x: x[0] / x[1])
     gps_measurements['GPSLongitude'] = gps_measurements['GPSLongitude'].map(lambda x: x[0] / x[1])
-    # gps_measurements['GPSAltitude'] = gps_measurements['GPSAltitude'].map(lambda x: x[0] / x[1])
+    gps_measurements['GPSAltitude'] = gps_measurements['GPSAltitude'].map(lambda x: 1 if pd.isna(x) else x[0] / x[1])
     gps_measurements['GPSDOP'] = gps_measurements['GPSDOP'].map(lambda x: x[0] / x[1])
     gps_measurements['GPSSpeed'] = gps_measurements['GPSSpeed'].map(lambda x: x[0] / x[1])
+    gps_measurements = gps_measurements[gps_measurements['GPSDOP'] < 3]
     gps_measurements.drop_duplicates()
     return gps_measurements
 
 
-
+# print(tabulate(gps_measurements, headers='keys', tablefmt='psql'))
 if __name__ == "__main__":
     # path_to_images = r"D:\HackZurich\Data\Trackpictures\nice_weather\nice_weather_filisur_thusis_20200824_pixelated"
     path_to_images = r"D:\HackZurich\Data\Trackpictures\nice_weather\nice_weather_thusis_filisur_20200827_pixelated"
