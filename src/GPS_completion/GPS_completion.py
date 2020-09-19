@@ -6,7 +6,6 @@ from scipy import spatial
 import io
 import sys
 import folium
-import re
 from PyQt5 import QtWidgets, QtWebEngineWidgets
 
 import gpxpy
@@ -154,7 +153,7 @@ if __name__ == "__main__":
     imagenums2 = imagenums2.astype(int)
 
     for i in range(0, len(imagenums2)):
-        dfobjgj.at[i, 'Closest Image'] = 'image_' + str(imagenums2[i]) + '.jpg'
+        dfobjgj.at[i, 'Closest Image'] = 'image_' + str(imagenums2[i]).zfill(5) + '.jpg'
 
 
     folium.GeoJson(
