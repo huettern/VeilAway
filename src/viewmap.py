@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 09:10:47
+# @Last Modified time: 2020-09-19 09:34:16
 
 import io
 import folium
@@ -53,6 +53,9 @@ class MapWidget(QWidget):
     m = folium.Map(
         location=coordinates, tiles="Stamen Toner", zoom_start=13
     )
+
+
+    folium.Marker(coordinates).add_to(m)
 
     data = io.BytesIO()
     m.save(data, close_file=False)

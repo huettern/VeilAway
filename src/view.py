@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 09:10:25
+# @Last Modified time: 2020-09-19 09:36:36
 
 
 import logging
@@ -19,10 +19,15 @@ from viewvideo import VideoWidget
 from viewsignal import SignalWidget
 from viewmap import MapWidget
 
+# view polling interval in [ms]
+VIEW_UPDATE_INTERVAL = 100
+MAP_UPDATE_INTERVAL = 1000
+
 class Window(QDialog):
 
   def __init__(self):
     super(Window, self).__init__()
+    self.mapUpdateCtr = 0
 
     # Button to load data
     self.LoadButton = QPushButton('Load Data')
@@ -52,13 +57,19 @@ class Window(QDialog):
 
     self.setLayout(layout)
 
-    self.setGeometry(100,100,1300,600)
+    # self.setGeometry(100,100,1300,600)
+    self.showMaximized()
+    self.setStyleSheet("background-color: white;")
     self.setWindowTitle("UI Testing")
 
   def update(self, model):
+    self.mapUpdateCtr += VIEW_UPDATE_INTERVAL
+    if self.mapUpdateCtr >= MAP_UPDATE_INTERVAL:
+      self.mapUpdateCtr = 0
+      self.wmap.update(model)
+    
     self.wsignal.update(model)
     self.wvideo.update(model)
-    self.wmap.update(model)
 
 
 class View(QObject):
@@ -78,7 +89,7 @@ class View(QObject):
     self.main.show()
 
     self.timer = QTimer(self)
-    self.timer.setInterval(100)
+    self.timer.setInterval(VIEW_UPDATE_INTERVAL)
     self.timer.timeout.connect(self.timerEvent)
     self.timer.start()
     print("after timer start")
