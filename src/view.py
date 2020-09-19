@@ -2,14 +2,14 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 09:36:36
+# @Last Modified time: 2020-09-19 10:11:07
 
 
 import logging
 import time
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QGroupBox, QDialog, QVBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QComboBox, QApplication, QWidget, QPushButton, QHBoxLayout, QGroupBox, QDialog, QVBoxLayout, QGridLayout, QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSlot, QTimer, QObject
@@ -29,13 +29,6 @@ class Window(QDialog):
     super(Window, self).__init__()
     self.mapUpdateCtr = 0
 
-    # Button to load data
-    self.LoadButton = QPushButton('Load Data')
-    # Button connected to `plot` method
-    self.PlotButton = QPushButton('Plot')
-
-    # set the layout
-    self.horizontalGroupBox = QGroupBox("Grid")
     layout = QGridLayout()
 
     layout.setColumnStretch(0, 6)
@@ -57,10 +50,10 @@ class Window(QDialog):
 
     self.setLayout(layout)
 
-    # self.setGeometry(100,100,1300,600)
-    self.showMaximized()
+    self.setGeometry(100,100,1300,600)
+    # self.showMaximized()
     self.setStyleSheet("background-color: white;")
-    self.setWindowTitle("UI Testing")
+    self.setWindowTitle("Trainline")
 
   def update(self, model):
     self.mapUpdateCtr += VIEW_UPDATE_INTERVAL
@@ -71,6 +64,68 @@ class Window(QDialog):
     self.wsignal.update(model)
     self.wvideo.update(model)
 
+
+class DebugWindow(QDialog):
+
+  def __init__(self, model):
+    super(DebugWindow, self).__init__()
+    self.model = model
+    self.horizontalGroupBox = QGroupBox("Grid")
+    layout = QGridLayout()
+
+    layout.setColumnStretch(0, 5)
+    layout.setColumnStretch(1, 5)
+    layout.setRowStretch(0, 5)
+    layout.setRowStretch(1, 5)
+
+    # first row: image selection
+    row = 0
+    layout.addWidget(QLabel("Image Type"),row,0,1,1)
+    self.cbImgSelect = QComboBox()
+    self.cbImgSelect.addItem("good weather")
+    self.cbImgSelect.addItem("bad weather")
+    self.cbImgSelect.addItem("night")
+    layout.addWidget(self.cbImgSelect,row,1,1,1)
+    self.cbImgSelect.currentIndexChanged.connect(self.cbImgChange)
+
+
+    # direction select
+    row = 1
+    layout.addWidget(QLabel("Direction"),row,0,1,1)
+    self.cbDirection = QComboBox()
+    self.cbDirection.addItem("Thusis -> Filisur")
+    self.cbDirection.addItem("Filisur -> Thusis")
+    layout.addWidget(self.cbDirection,row,1,1,1)
+    self.cbDirection.currentIndexChanged.connect(self.cbDirChange)
+
+    # im name
+    row = 2
+    layout.addWidget(QLabel("Image"),row,0,1,1)
+    self.lblImageName = QLabel()
+    layout.addWidget(self.lblImageName,row,1,1,1)
+
+    self.setLayout(layout)
+    self.setWindowTitle("debug")
+  
+  def cbImgChange(self, idx):
+    if idx == 0:
+      # good weather
+      self.model.setImageSource("good")
+    elif idx == 1:
+      # bad weather
+      self.model.setImageSource("bad")
+    elif idx == 2:
+      # night
+      self.model.setImageSource("night")
+
+  def cbDirChange(self, idx):
+    if idx == 0:
+      self.model.setDirection("tf")
+    elif idx == 1:
+      self.model.setDirection("ft")
+
+  def update(self, model):
+    self.lblImageName.setText(model.currentImage)
 
 class View(QObject):
   """docstring for Model"""
@@ -87,6 +142,8 @@ class View(QObject):
 
     self.main = Window()
     self.main.show()
+    self.debug = DebugWindow(self.model)
+    self.debug.show()
 
     self.timer = QTimer(self)
     self.timer.setInterval(VIEW_UPDATE_INTERVAL)
@@ -129,6 +186,7 @@ class View(QObject):
     if self.model.getChanged():
       # print("view: model has changed")
       self.main.update(self.model)
+      self.debug.update(self.model)
 
   def terminate(self):
     self.exit = True

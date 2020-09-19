@@ -2,13 +2,23 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 09:18:36
+# @Last Modified time: 2020-09-19 10:08:46
 
 
 import logging
 import time
+import os.path
 
 TRACK_PIC_DIR = "/home/noah/Trackpictures"
+DW_TO_DIR = {
+  "tfg": "nice_weather/nice_weather_thusis_filisur_20200827_pixelated",
+  "tfb": "bad_weather/bad_weather_thusis_filisur_20200829_pixelated",
+  "ftg": "nice_weather/nice_weather_filisur_thusis_20200824_pixelated",
+  "ftb": None,
+  "tfn": "night/night_thusis_filisur_20200828",
+  "ftn": None,
+}
+IMG_NOT_FOUND = "assets/imnotfound.png"
 
 class Model(object):
   """docstring for Model"""
@@ -18,6 +28,9 @@ class Model(object):
     self.view = None
     self.hasChanged = False
     self.tmpImage = 1100
+    self.imgSource = "g" # g for good weather, b for bad, n for night
+    self.drivingDirection = "tf" # tf for thusis filisur
+    self.currentImage = ""
 
   def modelThread(self):
     logging.info("Thread %s: starting", self.name)
@@ -42,7 +55,17 @@ class Model(object):
     return "Signal Name"
 
   def getImageName(self):
-    fname = ("%s/nice_weather/nice_weather_thusis_filisur_20200827_pixelated/image_%05d.jpg" % (TRACK_PIC_DIR, self.tmpImage) )
+    folder = DW_TO_DIR[self.drivingDirection+self.imgSource]
+    fname = ""
+    if folder is not None:
+      fname = ("%s/%s/image_%05d.jpg" % (TRACK_PIC_DIR, folder, self.tmpImage) )
+      self.currentImage = ("image_%05d.jpg" % (self.tmpImage))
+      print("loading %s" % fname)
+    else:
+      print("folder %s not found" % (folder))
+    
+    if not os.path.isfile(fname):
+      fname = IMG_NOT_FOUND
     self.tmpImage += 1
     return fname
 
@@ -54,6 +77,17 @@ class Model(object):
       self.hasChanged = False
       return True
     return False
+
+  def setImageSource(self, weather):
+    if weather == "good":
+      self.imgSource = "g"
+    elif weather == "bad":
+      self.imgSource = "b"
+    elif weather == "night":
+      self.imgSource = "n"
+
+  def setDirection(self, direction):
+    self.drivingDirection = direction
 
 if __name__ == "__main__":
   print("model main()")
