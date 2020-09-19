@@ -25,10 +25,11 @@ p {
 
 .value {
     position: relative;
-    margin-left: 50%;
+    margin-left: 40%;
     font-weight: 600;
     letter-spacing: 3px;
-    font-size: 4rem;
+    margin-bottom: 0;
+    font-size: 5rem;
 }
 
 .textnextsignal {
@@ -39,11 +40,12 @@ p {
 .imagenextsignal {
     width: inherit;
     position: relative;
-    margin-left: 50%;
+    margin-left: 40%;
 }
 
 .imagenextsignal img {
     /*width: 6rem;*/
+    padding-right: 20px;
 }
 
 .map img {

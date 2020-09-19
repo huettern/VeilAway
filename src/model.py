@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:22:24
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 15:08:19
+# @Last Modified time: 2020-09-19 16:07:21
 
 
 import logging
@@ -20,7 +20,7 @@ DW_TO_DIR = {
 }
 IMG_NOT_FOUND = "assets/imnotfound.png"
 
-SIGNAL_IMG_DIR = "assets/signals/png"
+SIGNAL_IMG_DIR = "assets/signals/png/120"
 
 SIGNAL_TYPES = ["40", "60", "90", "stop", "vmax"]
 
@@ -72,7 +72,7 @@ class Signal(object):
       self.coordinates = relativeToCoordinates(self.relative)
 
   def fromTest(self):
-    self.distant = SIGNAL_TYPES[3] # can be None or any of SIGNAL_TYPES
+    self.distant = SIGNAL_TYPES[0] # can be None or any of SIGNAL_TYPES
     self.main = SIGNAL_TYPES[0] # can be None or any of SIGNAL_TYPES
     self.id = "C5"
     self.elementType = "Main & distant signal"
@@ -142,13 +142,24 @@ class Model(object):
     return im
 
   def getARImageInfo(self):
-    imInfo = {}
-    imInfo['loc_x'] = 0
-    imInfo['loc_y'] = 0
-    imInfo['fname'] = SIGNAL_IMG_DIR+"/main40.png"
-    imInfo['show'] = self.overlayEnabled
+    imInfoList = []
+    y_off = -350
+    if self.nextSignal.main:
+      imInfo = {}
+      imInfo['loc_x'] = 0
+      imInfo['loc_y'] = y_off
+      imInfo['fname'] = SIGNAL_IMG_DIR+"/main"+self.nextSignal.main+".png"
+      imInfo['show'] = self.overlayEnabled
+      imInfoList.append(imInfo)
+    if self.nextSignal.distant:
+      imInfo = {}
+      imInfo['loc_x'] = -40
+      imInfo['loc_y'] = y_off+125
+      imInfo['fname'] = SIGNAL_IMG_DIR+"/distant"+self.nextSignal.distant+".png"
+      imInfo['show'] = self.overlayEnabled
+      imInfoList.append(imInfo)
 
-    return imInfo
+    return imInfoList
 
   def getMapLocation(self):
     return [47.3775499,8.4666755]

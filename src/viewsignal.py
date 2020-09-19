@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 14:50:01
+# @Last Modified time: 2020-09-19 15:59:34
 
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
@@ -13,7 +13,7 @@ from PyQt5 import QtWidgets, QtWebEngineWidgets
 import base64
 import datetime
 
-SIGNALS_DIR = "assets/signals/png"
+SIGNALS_DIR = "assets/signals/png/120"
 
 class SignalWidget(QWidget):
   """docstring for SignalWidget"""
@@ -46,32 +46,31 @@ class SignalWidget(QWidget):
     hours, remainder = divmod(s, 3600)
     minutes, seconds = divmod(remainder, 60)
     timestring = '{:02}:{:02}'.format(int(minutes), int(seconds))
-    # timestring = str(datetime.timedelta(seconds=self.sig.timeTo))
     distancestring = "%.2f km" % (self.sig.distanceTo/1000.0)
-    # im1str = SIGNALS_DIR+"/distant"+self.sig.distant+".png" if self.sig.distant else ""
-    # im1str = "img/distant"+self.sig.distant+".png" if self.sig.distant else ""
-    # im2str = SIGNALS_DIR+"/main"+self.sig.main+".png" if self.sig.main else ""
-    # im1str = "img/distant40.png"
-    # print(im1str)
     
+    script  = ("document.getElementById(\"timevalue\").innerHTML = \"%s\";" % (timestring))
+    script += ("document.getElementById(\"distancevalue\").innerHTML = \"%s\";" % (distancestring))
+
     if self.sig.distant:
       im1 = SIGNALS_DIR+"/distant"+self.sig.distant+".png" if self.sig.distant else ""
       # print(im1)
       data = open(im1, "rb").read()
       im1str = "data:image/png;base64,"+base64.b64encode(data).decode("utf-8")
+    else:
+      im1str = ""
+    script += ("document.getElementById(\"valueimg1\").src=\"%s\";" % (im1str))
     if self.sig.main:
       im2 = SIGNALS_DIR+"/main"+self.sig.main+".png" if self.sig.main else ""
       # print(im2)
       data = open(im2, "rb").read()
       im2str = "data:image/png;base64,"+base64.b64encode(data).decode("utf-8") 
+    else:
+      im2str = ""
+    script += ("document.getElementById(\"valueimg2\").src=\"%s\";" % (im2str))
 
     idstring = self.sig.id
     typestirng = self.sig.elementType
 
-    script  = ("document.getElementById(\"timevalue\").innerHTML = \"%s\";" % (timestring))
-    script += ("document.getElementById(\"distancevalue\").innerHTML = \"%s\";" % (distancestring))
-    script += ("document.getElementById(\"valueimg1\").src=\"%s\";" % (im1str))
-    script += ("document.getElementById(\"valueimg2\").src=\"%s\";" % (im2str))
     script += ("document.getElementById(\"idvalue\").innerHTML = \"%s\";" % (idstring))
     script += ("document.getElementById(\"typevalue\").innerHTML = \"%s\";" % (typestirng))
 

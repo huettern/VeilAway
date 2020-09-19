@@ -2,7 +2,7 @@
 # @Author: Noah Huetter
 # @Date:   2020-09-18 23:44:09
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2020-09-19 15:09:34
+# @Last Modified time: 2020-09-19 16:04:10
 
 # Media player source: https://stackoverflow.com/questions/57842104/how-to-play-videos-in-pyqt
 
@@ -35,17 +35,17 @@ class VideoWidget(QWidget):
 
   def update(self, model):
     img_fname = model.getImageName()
-    arImg = model.getARImageInfo()
+    arImgList = model.getARImageInfo()
 
     image = QImage(img_fname)
-    
-    if arImg['show']:
-      overlay = QImage(arImg['fname'])
 
     painter = QPainter()
     painter.begin(image)
-    if arImg['show']:
-      painter.drawImage(image.width()/2+arImg['loc_x'], image.height()/2+arImg['loc_y'], overlay)
+
+    for imInfo in arImgList:
+        if imInfo['show']:
+            overlay = QImage(imInfo['fname'])
+            painter.drawImage(image.width()/2+imInfo['loc_x'], image.height()/2+imInfo['loc_y'], overlay)
     painter.end()
      
     # label = QLabel()
