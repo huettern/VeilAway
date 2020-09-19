@@ -101,11 +101,17 @@ p {
       <div class="row">
           <div class="col-md-4">
                       <div class="blockpart time bg-primary">
-                          <p class="name"><strong>Time</strong></p>
+                          <div class="textnextsignal">
+                              <p style="margin-bottom: 0;"><strong>Time</strong></p>
+                              <p style="margin-bottom: 0;">to next Signal</p>
+                          </div>
                           <p id="timevalue" class="value">1:34</p>
                       </div>
                       <div class="blockpart distance bg-info">
-                          <p class="name"><strong>Distance</strong></p>
+                          <div class="textnextsignal">
+                              <p style="margin-bottom: 0;"><strong>Distance</strong></p>
+                              <p style="margin-bottom: 0;">to next Signal</p>
+                          </div>
                           <p id="distancevalue" class="value">2.34 km</p>
                       </div>
                       <div class="blockpart nextsignal bg-danger">
@@ -115,8 +121,8 @@ p {
                               <p style="margin-bottom: 0;" id="typevalue">Type: </p>
                           </div>
                           <div class="imagenextsignal">
-                              <img id="valueimg1" src="">
-                              <img id="valueimg2" src="">
+                              <img id="valueimg1" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAA6CAMAAADWZboaAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAWlBMVEX///8AAADn5+cpEACcQgDWWgD/awDvYwBCIQA5GAC9UgCtSgAQCADnWgBjKQBzMQCEOQAAjAAA3gAA7wAAnAAAKQAAQgAAWgAAGAAAzgAAOQAAewAArQAA9wB6vM/MAAAAAWJLR0QAiAUdSAAAAAd0SU1FB+QJEwoWCWZu4ZEAAAEFSURBVEjH7dfJEoIwEARQJiriDkRUFv//NwWBgZBQTofSk33wQOXVjMChCQIOSRK44r4qOSWTrnNSaZ8k4Z9VlpVK28plZ5WPNOdicmxZrtabcLteyS3LKGwTiS31M8M+u8/WpHumB5SGQxbQzxvP0iNITyw36MJnpheU0kF+g6eU4vfOsUBatH6hzoJXyU3F+RVNUq2vmQe91bDJHaaPvJU6LVBa6j4VSnOmT5R22zY/hRd9JwNpxTJFF74zTVBaj20fbE4w7R5PRR6UsjIpC/KiZv70T79BFS65h2B2aIqoHXVMhVmznSJ20muBuXYjllpHl1b+LXxJ95fOnflakd6m5XkBP7wU9B3bMZgAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjAtMDktMTlUMTA6MjM6NTUrMDI6MDAWhzROAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIwLTA5LTE5VDEwOjIyOjA5KzAyOjAwB1iD3AAAAABJRU5ErkJggg==">
+                              <img id="valueimg2" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAA8CAIAAADpFA0BAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH5AkTDiwi6HJudAAAA5VJREFUSMftl8tLK3cUxz8zE1OTps9ra9pC+kgNFdpFaaGldFHXCkVs3eiFSHeNf4FrJcM0ggtNhmQh9OrK5zUmkEIu2PeirRRKoYtWvGBR7jW5YydNdJz5dZFcNQ8f0FWp31U4nE/OnB+/8+N8JSEE9VpaWlpZWTkblySpv79/YGCgIVNqgNfX13d3d4eHh23bPgkqijI3N+f3+/v6+lrDQojFxcVCoTA4OBiPx2dnZxVFAWzbHhkZGR0dXVhY8Pv9vb29kiRxwlSVyWQSiUSxWJyYmGhraztbweVyqapaKpVmZmZWV1dPEIQQtm0vLy/H4/H9/f1oNOr1emmS1+uNRqPFYjGRSGSzWcdxanAul5ueni4Wi6qqut3uWno7vAwBkGsBt9utqqppmvF4fG1tTQhBPp+PxWKFQmFycrJWU4L34XP4Gr6Ez6DrtP7U1JRhGLFYLJ/PKz09PYqibG5ujo2NlctlgB6YhvegE56DNyEE38MDLMva2Njo6Ojwer2lUkmWJKn6JTXSCxF4CSw4hmMQ8AEM1oqXy+VEImGapiRJcuPJvACBpuOS4Z3T5s+G69UGysPfNlRvigQukC6F/4C7D/NkkMABG34E51K4Aim4CzIooIAN38EtaBwCXM33gS9AgRHoBge+hWnYapHYCj6GDNwBP1TgPhzSUq7WYQdK8DsXS+Zf6Br+f8Ctb5hL5vlH6fQgYPsv7pWvDLcr3Ozmk27eeIojh40dZn7hzg62cwX4oy6i73KjHQTtgg9foftpBnP8fP+ynp94hE9f54anNr2yBND1JOHXmh+SJvjFx+hob5x7SeatZ2p/dBFcOuaoqTcEB1bzQ9IEbx/w0736kMSRze0tHHEZfOyg/sA3OxwKkEGmfMSt31hp9TC0OO1fi9zM8/GrvP0spSO++pPb2+xXrgYDWwfENnncjeXwd6tuL4IBR/DgkIv1H52qa/gavoZbwUIIn88XiUQ8Hs9VAI/HE4lEfD6fEEIOBAKmaYbD4fPW9LOqruzhcNg0zUAgUFvWdV2vVCqapp0u601yu92aplUqFV3Xc7lcbdN3HCebzeq6bhiGpmnn2QRN0wzD0HW9ziacGJRkMmlZlqqqLlfdw1g1KJZlJZPJTCZTZ1CqchwnnU6nUinDMMbHx4PBYCgUCoVCwWBwfHzcMIxUKpVOp6s1q2phyvb29oaGhhpM2fz8fGdn57mm7ERXt4P/AEw13j4UKTLFAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIwLTA5LTE5VDE0OjQ0OjM0KzAyOjAwvE+N0QAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMC0wOS0xOVQxNDo0NDozNCswMjowMM0SNW0AAAAASUVORK5CYII=">
                           </div>
                       </div>
                   </div>
