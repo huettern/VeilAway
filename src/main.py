@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
   # create main view thread
   view = View("view")
-  viewThd = threading.Thread(target=view.viewThread)
+  # viewThd = threading.Thread(target=view.viewThread)
 
   # connect model and view
   model.setView(view)
@@ -29,25 +29,19 @@ if __name__ == "__main__":
   # start threads
   logging.info("Main    : starting model thread")
   modelThd.start()
-  logging.info("Main    : starting view thread")
-  viewThd.start()
+  # logging.info("Main    : starting view thread")
+  # viewThd.start()
+  view.viewThread()
   
 
   # x.join()
-  time.sleep(1)
+  time.sleep(5)
+  logging.warning("Main    : terminating in 2s")
+  time.sleep(2)
+
   view.terminate()
   model.terminate()
   viewThd.join()
   modelThd.join()
   logging.info("Main    : exiting")
 
-
-# from PyQt5.QtWidgets import QApplication, QLabel
-
-# app = QApplication([])
-
-# label = QLabel('Hello World!')
-
-# label.show()
-
-# app.exec_()
