@@ -31,7 +31,7 @@ def read_track_from_gpx(path_to_gpx):
     gpx = gpxpy.parse
 
 def read_track_from_exif_images(path_to_images):
-    images = os.listdir(path_to_images)[:1000]
+    images = os.listdir(path_to_images)
     images = [img for img in images if img[-4:] == ".jpg"]
     gps_measurements = pd.DataFrame()
 
@@ -208,6 +208,7 @@ def extract_img_number(row):
 
 def plot_obj_images_on_map(obj_gps_pos, track_gps, path_to_images):
     app = QtWidgets.QApplication(sys.argv)
+
     token = "pk.eyJ1IjoiaGFja3p1cmljaHVzZXIiLCJhIjoiY2tmOWl4NjU0MG1rcDJ5cWdxbHphNzQ5ayJ9.IEOl1OkLzh_vgznx38Anog"  # your mapbox token
     tileurl = 'https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=' + str(token)
 
@@ -217,10 +218,13 @@ def plot_obj_images_on_map(obj_gps_pos, track_gps, path_to_images):
     )
 
     for index, row in obj_gps_pos.iterrows():
-        img_path = "file:///" + path_to_images.replace("\\", "/") + "/" + row["ImgName"]
-        html = '<div><img src="{}" width="512" height="384"></div>'.format(img_path)
-        frame = IFrame(html=html, width=512, height=384)
-        popup = folium.Popup(frame, max_width=1024)
+        img_path = "file://" + path_to_images.replace("\\", "/") + "/" + row["ImgName"]
+
+        # html = '<div><img src="{}" width="512" height="384"></div>'.format(img_path)
+        # frame = IFrame(html=html, width=512, height=384)
+        # popup = folium.Popup(frame, max_width=1024)
+        iframe = IFrame('<a href="{}">{}</a>'.format(img_path, row["Element Type"]), width=512, height=384)
+        popup = folium.Popup(iframe, max_width=1000)
         folium.Marker([row['GPSLatitude'], row['GPSLongitude']], popup=popup).add_to(m)
 
     points = []
